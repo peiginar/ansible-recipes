@@ -1,0 +1,16 @@
+[libvirt1]
+#192.168.122.149
+
+[lxc1]
+#10.78.169.254
+#10.78.169.195
+
+[desktop]
+localhost ansible_user="{{lookup('env','LOGNAME')}}"
+
+[linux:children]
+libvirt1
+lxc1
+desktop
+
+[windows]

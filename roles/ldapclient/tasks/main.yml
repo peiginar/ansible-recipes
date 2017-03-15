@@ -1,0 +1,61 @@
+- name: debconf-ldap-uris
+  debconf:
+    name: nslcd
+    question: nslcd/ldap-uris
+    vtype: string
+    value: '{{ ldap_uri }}'
+  when: ldap_uri is defined
+  tags: ldapclient
+
+- name: debconf-ldap-base
+  debconf:
+    name: nslcd
+    question: nslcd/ldap-base
+    vtype: string
+    value: '{{ ldap_base }}'
+  when: ldap_uri is defined
+  tags: ldapclient
+
+- name: debconf-ldap-nsswitch
+  debconf:
+    name: libnss-ldapd
+    question: libnss-ldapd/nsswitch
+    vtype: multiselect
+    value: "group, passwd"
+  when: ldap_uri is defined
+  tags: ldapclient
+
+- name: apt install ldap
+  apt:
+    name: libnss-ldapd
+    state: latest
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
+  when: ldap_uri is defined
+  notify:
+    - restart nslcd
+    - restart nscd
+  tags: ldapclient
+
+- name: Insert pam_mkhomedir
+  lineinfile:
+    dest: /etc/pam.d/common-session
+    insertafter: '^session.*pam_ldap.so'
+    line: 'session required pam_mkhomedir.so'
+  when: ldap_uri is defined
+  tags: ldapclient
+
+- name: test ldap uid
+  shell: id "{{ ldap_test_uid }}"
+  changed_when: False
+  when: ldap_test_uid is defined
+  tags: ldapclient
+
+- name: restart nslcd
+  shell: /bin/true
+  changed_when: True
+  notify:
+    - restart nslcd
+    - restart nscd
+  when: restart_nslcd is defined
+  tags: ldapclient

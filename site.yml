@@ -1,0 +1,6 @@
+- hosts: linux
+  become: yes
+  roles:
+    - debug
+    - common
+    - ldapclient
