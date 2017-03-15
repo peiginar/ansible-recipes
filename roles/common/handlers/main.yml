@@ -1,0 +1,8 @@
+- name: update resolvconf
+  shell: /sbin/resolvconf -u
+- name: update locales
+  shell: /usr/sbin/dpkg-reconfigure -f noninteractive locales
+- name: restart autofs
+  systemd: name=autofs state=restarted
+- name: restart ntp
+  systemd: name=ntp state=restarted

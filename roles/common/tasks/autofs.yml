@@ -1,0 +1,28 @@
+- name: apt install autofs
+  apt:
+    name: autofs
+    state: latest
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
+  tags: [common, autofs]
+
+- name: nfs_automaster
+  lineinfile:
+    dest: /etc/auto.master
+    insertafter: '/net\s+-hosts'
+    line: "/{{ item.mapkey }} /etc/auto.{{ item.mapkey }}"
+  with_items: '{{ nfs_autofs }}'
+  when: nfs_autofs is defined
+  notify: restart autofs
+  tags: [common, autofs]
+
+- name: nfs_autofs
+  lineinfile:
+    dest: "/etc/auto.{{ item.mapkey }}"
+    regexp: '^{{ item.dest }} '
+    line: "{{ item.dest }} {{ item.opt }} {{ item.src }}"
+    create: yes
+  with_items: '{{ nfs_autofs }}'
+  when: nfs_autofs is defined
+  notify: restart autofs
+  tags: [common, autofs]

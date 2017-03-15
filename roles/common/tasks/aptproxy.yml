@@ -1,0 +1,34 @@
+- name: search file defined apt proxy
+  shell: grep -i -l -e '^acquire::http::proxy' $(find /etc/apt/ -type f) /dev/null|head -n1
+  register: search_apt_proxy
+  changed_when: False
+  tags: apt_proxy
+
+- name: set apt_proxy_path if found
+  set_fact:
+    apt_proxy_path: "{{ search_apt_proxy.stdout }}"
+  when: search_apt_proxy.stdout != ""
+  tags: apt_proxy
+
+- name: set apt_proxy_path if not found
+  set_fact: apt_proxy_path="/etc/apt/apt.conf.d/02proxy"
+  when: search_apt_proxy.stdout == ""
+  tags: apt_proxy
+
+- name: Set apt http proxy define
+  lineinfile:
+    dest: "{{ apt_proxy_path }}"
+    regexp: '(?i)^acquire::http::proxy'
+    line: 'Acquire::http::proxy "{{ apt_http_proxy }}";'
+    create: yes
+  when: apt_http_proxy is defined
+  tags: apt_proxy
+
+- name: Set apt https proxy define
+  lineinfile:
+    dest: "{{ apt_proxy_path }}"
+    regexp: '(?i)^acquire::https::proxy'
+    line: 'Acquire::https::proxy "{{ apt_https_proxy }}";'
+    create: yes
+  when: apt_https_proxy is defined
+  tags: apt_proxy

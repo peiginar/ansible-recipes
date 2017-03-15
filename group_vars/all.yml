@@ -1,0 +1,15 @@
+ansible_python_interpreter: /usr/bin/python3
+ansible_user: ubuntu
+apt_cache_validate_time: 600
+dns_domain: example.localnet
+ldap_uri: ldap://192.168.1.253/
+ldap_base: dc=example,dc=local
+ldap_test_uid: 1025
+nfs_server: "nfs.{{ dns_domain }}"
+apt_http_proxy: http://172.16.67.219:3142/
+apt_https_proxy: http://172.16.67.219:3128/
+nfs_autofs:
+  - { mapkey: share, dest: pub, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/srv/pub" }
+  - { mapkey: share, dest: tmp, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/srv/tmp" }
+  - { mapkey: share, dest: home, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/home" }
+sudoers_users: '%ateam'

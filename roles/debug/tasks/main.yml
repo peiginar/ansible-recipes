@@ -1,0 +1,24 @@
+- name: show virt type
+  debug: var=ansible_virtualization_type
+  when: ansible_virtualization_type in ('VMware', 'kvm', 'lxc')
+  tags: debug
+
+#- name: show nfs_autofs
+#  debug:
+#    msg: "{{ item.mapkey }}: {{ item.dest }} {{ item.opt }} {{ item.src }}"
+#  with_items: '{{ nfs_autofs }}'
+#  tags: debug
+
+#- name: show sudoers_users
+#  debug:
+#    msg: "{{ item.replace('%', '') }}"
+#  with_items: '{{ sudoers_users }}'
+#  tags: debug
+
+#- name: Set authorized key for user ubuntu copying it from current user
+#  authorized_key:
+#    user: "{{ ansible_user_id }}"
+#    state: present
+#    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+#  tags: [setup, debug]
+
