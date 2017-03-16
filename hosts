@@ -14,3 +14,4 @@ lxc1
 desktop
 
 [windows]
+#host11 ansible_host=192.168.45.137 ansible_user=Administrator ansible_password=password
