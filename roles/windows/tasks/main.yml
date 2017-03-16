@@ -1,0 +1,70 @@
+- name: Create ansible work directory
+  win_file:
+    path: "{{ win_ansible_work }}"
+    state: directory
+  changed_when: False
+
+#- name: Powershell ExecutionPolicy
+#  win_shell: Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+#
+#- name: Set proxy setting by regedit
+#  win_regedit:
+#    key: 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+#    value: ProxyEnable
+#    data: 1
+#    type: dword
+#
+#- name: Get proxy setting
+#  win_shell: Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable
+#  register: reg_proxy
+#
+#- name: Show proxy setting
+#  debug:
+#    msg: "{{ reg_proxy.stdout.strip() }}"
+#
+#- name: Set proxy setting direct
+#  win_shell: Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable -Value 0
+#  when: reg_proxy.stdout.strip() != "0"
+
+- name: Check chocolatey Installed
+  win_shell: "[System.Environment]::GetEnvironmentVariable('ChocolateyInstall')"
+  register: chocolatey_installed_env
+  ignore_errors: yes
+  changed_when: False
+
+- name: Set chocolatey Installed variable
+  set_fact:
+    chocolatey_installed: "{{ chocolatey_installed_env.stdout | length }}"
+
+- name: Show chocolatey Installed variable
+  debug:
+    var: chocolatey_installed
+
+- name: Download chocolatey install.ps1
+  win_get_url:
+    url: https://chocolatey.org/install.ps1
+    dest: "{{ win_ansible_work }}\\install.ps1"
+    proxy_url: "{{ win_http_proxy }}"
+  when: chocolatey_installed == "0"
+
+- name: Install chocolatey
+  win_shell: powershell -ExecutionPolicy RemoteSigned -File {{ win_ansible_work }}/install.ps1
+  environment:
+    chocolateyProxyLocation: "{{ win_http_proxy }}"
+  when: chocolatey_installed == "0"
+
+- name: Set chocolatey proxy setting
+  win_shell: >
+    choco config set proxy {{ http_proxy }};
+    choco config set proxyUser {{ http_proxy_user }};
+    choco config set proxyPassword {{ http_proxy_pass }};
+  when: chocolatey_installed == "0"
+
+- name: chocolatey install
+  win_chocolatey:
+    name: "{{ item }}"
+  with_items:
+    - Git
+    - TortoiseGit
+    - nodist
+    - VisualStudioCode
