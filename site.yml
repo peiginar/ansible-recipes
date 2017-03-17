@@ -1,6 +1,10 @@
 - hosts: linux
-  become: yes
   roles:
     - debug
     - common
     - ldapclient
+
+- hosts: windows
+  roles:
+    - debug
+    - windows

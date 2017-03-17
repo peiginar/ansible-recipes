@@ -1,6 +1,6 @@
 - name: show virt type
   debug: var=ansible_virtualization_type
-  when: ansible_virtualization_type in ('VMware', 'kvm', 'lxc')
+  when: ansible_os_family != "Windows" and ansible_virtualization_type in ('VMware', 'kvm', 'lxc')
   tags: debug
 
 #- name: show nfs_autofs
@@ -21,4 +21,3 @@
 #    state: present
 #    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 #  tags: [setup, debug]
-

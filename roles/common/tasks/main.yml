@@ -55,6 +55,9 @@
     - bash-completion
     - htop
     - glances
+    - parted
+    - gdisk
+    - "{{ apt_extra_packages }}"
   async: 180
   poll: 5
   tags: [common, aptinstall]
@@ -70,6 +73,16 @@
   when: ansible_virtualization_type is defined and ansible_virtualization_type != "lxc"
   tags: [common, aptinstall]
 
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+    autoremove: yes
+    update_cache: yes
+  async: 180
+  poll: 5
+  tags: [common, aptinstall]
+  when: distupgrade|default("") == "yes"
+
 - name: Set timezone variables
   timezone:
     name: Asia/Tokyo
@@ -83,14 +96,14 @@
   tags: [common, locale]
 
 - name: Test default locale
-  shell: grep -i -e '^LANG=ja_JP.UTF-8' /etc/default/locale
+  shell: grep -i -e '^LANG="*ja_JP.UTF-8' /etc/default/locale
   register: result
   ignore_errors: yes
   changed_when: False
   tags: [common, locale]
 
 - name: Update default locale
-  shell: update-locale LANG=ja_JP.UTF-8
+  shell: update-locale LANG="ja_JP.UTF-8"
   when: result|failed
   tags: [common, locale]
 
@@ -119,6 +132,6 @@
 
 - include: autofs.yml
   when: ansible_virtualization_type is defined and ansible_virtualization_type != "lxc"
-  tags: [common, aptinstall]
+  tags: [common, autofs]
 
 - include: ntp.yml
