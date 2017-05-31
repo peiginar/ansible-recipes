@@ -4,3 +4,8 @@ ansible_connection: winrm
 ansible_winrm_server_cert_validation: ignore
 win_http_proxy: "http://{{ http_proxy_server }}:13128/"
 win_ansible_work: C:\Users\{{ ansible_user }}\Desktop\ansible-work
+choco_packages:
+#choco_packages:
+#  - TortoiseGit
+#  - nodist
+#  - VisualStudioCode

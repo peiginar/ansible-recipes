@@ -26,19 +26,41 @@
 #  win_shell: Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable -Value 0
 #  when: reg_proxy.stdout.strip() != "0"
 
+- name: netsh show http proxy
+  win_shell: netsh winhttp show proxy
+  register: netsh_http_proxy
+  changed_when: False
+  tags: nethttp
+
+- name: netsh set http proxy
+  win_shell: >
+    netsh winhttp set proxy "{{ win_http_proxy.replace('http:','').replace('/','') }}" \
+    "<local>;*.{{ dns_domain }}"
+  when: netsh_http_proxy.stdout.find('no proxy server') != -1
+  tags: nethttp
+
+- name: windows update
+  win_updates:
+    log_path: c:\ansible_wu.txt
+  when: win_update is defined or distupgrade is defined
+  tags: win_update
+
 - name: Check chocolatey Installed
   win_shell: "[System.Environment]::GetEnvironmentVariable('ChocolateyInstall')"
   register: chocolatey_installed_env
-  ignore_errors: yes
   changed_when: False
+  ignore_errors: yes
+  tags: choco_setup
 
 - name: Set chocolatey Installed variable
   set_fact:
     chocolatey_installed: "{{ chocolatey_installed_env.stdout | length }}"
+  tags: choco_setup
 
 - name: Show chocolatey Installed variable
   debug:
     var: chocolatey_installed
+  tags: choco_setup
 
 - name: Download chocolatey install.ps1
   win_get_url:
@@ -46,25 +68,40 @@
     dest: "{{ win_ansible_work }}\\install.ps1"
     proxy_url: "{{ win_http_proxy }}"
   when: chocolatey_installed == "0"
+  tags: choco_setup
 
 - name: Install chocolatey
   win_shell: powershell -ExecutionPolicy RemoteSigned -File {{ win_ansible_work }}/install.ps1
   environment:
     chocolateyProxyLocation: "{{ win_http_proxy }}"
   when: chocolatey_installed == "0"
+  tags: choco_setup
 
-- name: Set chocolatey proxy setting
+- name: Set chocolatey proxy setting with user/pass
   win_shell: >
     choco config set proxy {{ http_proxy }};
     choco config set proxyUser {{ http_proxy_user }};
     choco config set proxyPassword {{ http_proxy_pass }};
-  when: chocolatey_installed == "0"
+  when: chocolatey_installed == "0" and http_proxy is defined and http_proxy_user is defined
+  tags: choco_setup
+
+- name: Set chocolatey proxy setting
+  win_shell: >
+    choco config set proxy {{ http_proxy }};
+  when: chocolatey_installed == "0" and http_proxy is defined and http_proxy_user is not defined
+  tags: choco_setup
+
+- name: chocolatey install
+  win_chocolatey:
+    name: Git
+    params: /GitAndUnixToolsOnPath /NoAutoCrlf
+    state: present
+  tags: choco_install
 
 - name: chocolatey install
   win_chocolatey:
     name: "{{ item }}"
   with_items:
-    - Git
-    - TortoiseGit
-    - nodist
-    - VisualStudioCode
+    - "{{ choco_packages }}"
+  when: choco_packages
+  tags: choco_install

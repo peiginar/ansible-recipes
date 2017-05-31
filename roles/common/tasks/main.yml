@@ -54,7 +54,6 @@
     - language-pack-ja
     - bash-completion
     - htop
-    - glances
     - parted
     - gdisk
     - "{{ apt_extra_packages }}"

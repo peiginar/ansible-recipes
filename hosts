@@ -8,10 +8,19 @@
 [desktop]
 localhost ansible_user="{{lookup('env','LOGNAME')}}"
 
+[server]
+
 [linux:children]
 libvirt1
 lxc1
+server
 desktop
 
-[windows]
+[windows1]
 #host11 ansible_host=192.168.45.137 ansible_user=Administrator ansible_password=password
+
+[windows2]
+
+[windows:children]
+windows1
+windows2
