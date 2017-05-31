@@ -1,0 +1,2 @@
+http_proxy_server: 192.168.1.252
+win_http_proxy: "http://{{ http_proxy_server }}:3128/"

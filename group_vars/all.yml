@@ -1,5 +1,5 @@
 ansible_become: yes
-ansible_python_interpreter: /usr/bin/python3
+#ansible_python_interpreter: /usr/bin/python3
 ansible_user: ubuntu
 apt_cache_validate_time: 600
 dns_domain: example.localnet
@@ -14,8 +14,8 @@ http_proxy_server: 172.16.67.219
 http_proxy_user: user
 http_proxy_pass: pass
 http_proxy: "http://{{ http_proxy_server }}:3128/"
-apt_http_proxy: http://172.16.67.219:3142/
-apt_https_proxy: http://172.16.67.219:3128/
+apt_http_proxy: "http://{{ http_proxy_server }}:3142/"
+apt_https_proxy: "http://{{ http_proxy_server }}:3128/"
 nfs_autofs:
   - { mapkey: share, dest: pub, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/srv/pub" }
   - { mapkey: share, dest: tmp, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/srv/tmp" }
