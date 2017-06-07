@@ -3,6 +3,6 @@
 - name: update locales
   shell: /usr/sbin/dpkg-reconfigure -f noninteractive locales
 - name: restart autofs
-  systemd: name=autofs state=restarted
+  service: name=autofs state=restarted
 - name: restart ntp
-  systemd: name=ntp state=restarted
+  service: name=ntp state=restarted

@@ -133,4 +133,14 @@
   when: ansible_virtualization_type is defined and ansible_virtualization_type != "lxc"
   tags: [common, autofs]
 
+- name: create ldap home dir
+  file:
+    path: "{{ ldap_mkhomedir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: ldap_mkhomedir is defined
+  tags: [common, autofs]
+
 - include: ntp.yml

@@ -1,4 +1,4 @@
 - name: restart nslcd
-  systemd: name=nslcd state=restarted
+  service: name=nslcd state=restarted
 - name: restart nscd
-  systemd: name=nscd state=restarted
+  service: name=nscd state=restarted
