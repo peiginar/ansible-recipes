@@ -79,16 +79,22 @@
 
 - name: Set chocolatey proxy setting with user/pass
   win_shell: >
-    choco config set proxy {{ http_proxy }};
-    choco config set proxyUser {{ http_proxy_user }};
-    choco config set proxyPassword {{ http_proxy_pass }};
-  when: chocolatey_installed == "0" and http_proxy is defined and http_proxy_user is defined
+    choco config set proxy {{ choco_proxy }};
+    choco config set proxyUser {{ choco_proxy_user }};
+    choco config set proxyPassword {{ choco_proxy_pass }};
+  when: chocolatey_installed == "0" and choco_proxy is defined and choco_proxy_user is defined
   tags: choco_setup
 
 - name: Set chocolatey proxy setting
   win_shell: >
-    choco config set proxy {{ http_proxy }};
-  when: chocolatey_installed == "0" and http_proxy is defined and http_proxy_user is not defined
+    choco config set proxy {{ choco_proxy }};
+  when: chocolatey_installed == "0" and choco_proxy is defined and choco_proxy_user is not defined
+  tags: choco_setup
+
+- name: Set chocolatey proxy setting default
+  win_shell: >
+    choco config set proxy {{ win_http_proxy }};
+  when: chocolatey_installed == "0" and choco_proxy is not defined
   tags: choco_setup
 
 - name: chocolatey install

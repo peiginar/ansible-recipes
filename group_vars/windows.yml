@@ -3,8 +3,14 @@ ansible_port: 5986
 ansible_connection: winrm
 ansible_winrm_server_cert_validation: ignore
 win_http_proxy: "http://{{ http_proxy_server }}:13128/"
+choco_proxy: "{{ win_http_proxy }}"
+#choco_proxy_user: "{{ http_proxy_user }}"
+#choco_proxy_pass: "{{ http_proxy_pass }}"
 win_ansible_work: C:\Users\{{ ansible_user }}\Desktop\ansible-work
 choco_packages:
+  - javaruntime
+  - firefox
+  - googlechrome
 #choco_packages:
 #  - TortoiseGit
 #  - nodist

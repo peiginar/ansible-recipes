@@ -1,0 +1,11 @@
+choco_packages:
+  - javaruntime
+  - firefox
+  - googlechrome
+  - python2
+  - TortoiseGit
+  - nodist
+  - VisualStudioCode
+  - putty.install
+  - winscp.install
+  - sudo
