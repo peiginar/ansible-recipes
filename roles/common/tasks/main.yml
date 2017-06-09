@@ -107,7 +107,7 @@
   tags: [common, locale]
 
 - name: create skel .vimrc
-  copy: dest='/etc/skel/.vimrc' content='set modelines\n' mode=0644
+  copy: dest='/etc/skel/.vimrc' content='set modeline\n' mode=0644
   tags: [common, skel]
 
 - name: create skel .viminfo

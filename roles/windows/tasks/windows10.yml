@@ -1,0 +1,11 @@
+- name: Get Firewall rule to allow mDNS
+  win_shell: Get-NetFirewallPortFilter -Protocol TCP | where Localport -eq 5353
+  register: firewall_mdns_allow
+  changed_when: False
+  tags: firewall
+
+- name: Firewall rule to allow mDNS
+  win_shell: >
+    New-NetFirewallRule -Protocol TCP -LocalPort 5353 -Direction Inbound -Action Allow -DisplayName mDNS-in
+  when: firewall_mdns_allow.stdout.strip() == ""
+  tags: firewall
