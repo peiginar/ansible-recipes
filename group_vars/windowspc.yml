@@ -1,11 +1,12 @@
 choco_packages:
-  - javaruntime
+  - sudo
+  - jdk8
   - firefox
   - googlechrome
-  - python2
   - TortoiseGit
   - nodist
   - VisualStudioCode
   - putty.install
   - winscp.install
-  - sudo
+  - python2
+  - adobereader

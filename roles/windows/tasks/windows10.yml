@@ -9,3 +9,32 @@
     New-NetFirewallRule -Protocol TCP -LocalPort 5353 -Direction Inbound -Action Allow -DisplayName mDNS-in
   when: firewall_mdns_allow.stdout.strip() == ""
   tags: firewall
+
+- name: Firewall rule to allow RDP / RemoteDesktop-UserMode-In-TCP
+  win_firewall_rule:
+    name: RemoteDesktop-UserMode-In-TCP
+    direction: in
+    action: allow
+    protocol: tcp
+    state: present
+    enabled: yes
+  tags: firewall
+
+- name: settings
+  win_regedit:
+    key: '{{ item.key }}'
+    value: '{{ item.value }}'
+    data: '{{ item.data }}'
+    datatype: '{{ item.datatype | default("dword") }}'
+  with_items:
+    - key: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server
+      value: fDenyTSConnections
+      data: 0
+    - key: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp
+      value: UserAuthentication
+      data: 1
+    - key: HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters
+      value: NTPServer
+      data: "{{ ntp_servers[0] }},0x9"
+      datatype: string
+  tags: win_settings

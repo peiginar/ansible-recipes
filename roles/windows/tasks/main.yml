@@ -45,18 +45,18 @@
   when: win_update is defined or distupgrade is defined
   tags: win_update
 
-- name: Get Firewall rule to ping inbound
-  win_shell: >
-      netsh advfirewall firewall show rule profile=private,public name="ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)" dir=in| Select-String 'Enabled'
-  register: firewall_ping_allow
-  changed_when: False
-  tags: firewall
-
-- name: Firewall rule to allow ping inbound
-  win_shell: >
-      netsh advfirewall firewall set rule profile=private,public name="ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)" dir=in new enable=yes
-  when: firewall_ping_allow.stdout.strip()| search('Enabled:.*No$')
-  tags: firewall
+#- name: Get Firewall rule to ping inbound
+#  win_shell: >
+#      netsh advfirewall firewall show rule profile=private,public name="ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)" dir=in| Select-String 'Enabled'
+#  register: firewall_ping_allow
+#  changed_when: False
+#  tags: firewall
+#
+#- name: Firewall rule to allow ping inbound
+#  win_shell: >
+#      netsh advfirewall firewall set rule profile=private,public name="ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)" dir=in new enable=yes
+#  when: firewall_ping_allow.stdout.strip()| search('Enabled:.*No$')
+#  tags: firewall
 
 - include: windows10.yml
   when: ansible_distribution_major_version|int >= 10
@@ -113,11 +113,17 @@
   when: chocolatey_installed == "0" and choco_proxy is not defined
   tags: choco_setup
 
-- name: chocolatey install
+- name: chocolatey Git install
   win_chocolatey:
     name: Git
     params: /GitAndUnixToolsOnPath /NoAutoCrlf
     state: present
+  tags: choco_install
+
+- name: chocolatey javaruntime uninstall
+  win_chocolatey:
+    name: javaruntime
+    state: absent
   tags: choco_install
 
 - name: chocolatey install
@@ -127,3 +133,4 @@
     - "{{ choco_packages }}"
   when: choco_packages
   tags: choco_install
+
