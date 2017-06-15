@@ -10,14 +10,30 @@
   when: firewall_mdns_allow.stdout.strip() == ""
   tags: firewall
 
-- name: Firewall rule to allow RDP / RemoteDesktop-UserMode-In-TCP
-  win_firewall_rule:
-    name: RemoteDesktop-UserMode-In-TCP
-    direction: in
-    action: allow
-    protocol: tcp
-    state: present
-    enabled: yes
+- name: Get Firewall rule to allow ping
+  win_shell: Get-NetFirewallRule -Direction Inbound| where DisplayName -Like "ファイル*ICMPv4*"| % { $_.Enabled }
+  register: firewall_ping_allow
+  changed_when: False
+  ignore_errors: yes
+  tags: firewall
+
+- name: Firewall rule to allow ping
+  win_shell: Get-NetFirewallRule -Direction Inbound| where DisplayName -Like "ファイル*ICMPv4*" | \
+    Set-NetFirewallRule -Enabled True -Action Allow
+  when: "{{ 'False' in firewall_ping_allow.stdout_lines }}"
+  tags: firewall
+
+- name: Get Firewall rule to allow RDP
+  win_shell: Get-NetFirewallRule| where Name -Like "RemoteDesktop-UserMode-In-TCP*" | % { $_.Enabled }
+  register: firewall_rdp_allow
+  changed_when: False
+  ignore_errors: yes
+  tags: firewall
+
+- name: Firewall rule to allow RDP
+  win_shell: Get-NetFirewallRule| where Name -Like "RemoteDesktop-UserMode-In-TCP*" | \
+    Set-NetFirewallRule -Enabled True -Action Allow
+  when: "{{ 'False' in firewall_rdp_allow.stdout_lines }}"
   tags: firewall
 
 - name: settings
