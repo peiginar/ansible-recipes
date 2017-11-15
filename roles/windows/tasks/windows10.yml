@@ -49,6 +49,10 @@
     - key: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp
       value: UserAuthentication
       data: 1
+    - key: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime\Servers
+      value: 1
+      data: "{{ ntp_servers[0] }}"
+      datatype: string
     - key: HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters
       value: NTPServer
       data: "{{ ntp_servers[0] }},0x9"

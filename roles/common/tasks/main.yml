@@ -83,6 +83,13 @@
   tags: [common, aptinstall]
   when: distupgrade|default("") == "yes"
 
+- name: apt autoremove after upgrade
+  shell: apt-get autoremove -y
+  async: 180
+  poll: 5
+  tags: [common, aptinstall]
+  when: distupgrade|default("") == "yes"
+
 - name: Set timezone variables
   timezone:
     name: Asia/Tokyo
@@ -126,7 +133,7 @@
     line: "{{ item }} ALL=(ALL:ALL) ALL"
     create: yes
     mode: 0440
-  when: sudoers_users is defined
+  when: sudoers_users|default('')|length() > 0
   with_items: "{{ sudoers_users }}"
   tags: [common, sudoers]
 

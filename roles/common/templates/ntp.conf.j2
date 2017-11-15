@@ -10,4 +10,10 @@ restrict -4 default kod notrap nomodify nopeer noquery limited
 restrict -6 default kod notrap nomodify nopeer noquery limited
 restrict 127.0.0.1
 restrict ::1
+{% if ntp_restricts is defined %}
+{% for restrict in ntp_restricts %}
+{{ restrict }}
+{% endfor %}
+{% else %}
 restrict source notrap nomodify noquery
+{% endif %}
