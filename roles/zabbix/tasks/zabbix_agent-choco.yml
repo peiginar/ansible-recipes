@@ -1,0 +1,32 @@
+- import_tasks: win_firewall.yml
+
+- name: chocolatey zabbix-agent install
+  win_chocolatey:
+    name: zabbix-agent
+    state: present
+  tags: [zabbix]
+
+- name: get choco zabbix version
+  win_shell: choco list --local-only zabbix-agent| Select-String "zabbix-agent"
+  register: choco_zabbix_version
+  tags: [zabbix]
+
+- name: set zabbix accept servers defaults
+  set_fact:
+    zabbix_servers_accept: "{{ zabbix_server }}"
+  when: zabbix_servers_accept is not defined and choco_zabbix_version.stdout.replace('zabbix-agent', '').strip() < '3.4'
+  tags: [zabbix]
+
+- name: show zabbix accept servers defaults
+  debug:
+    var: zabbix_servers_accept
+  tags: [zabbix]
+
+- name: setup zabbix_agentd.conf
+  template:
+    src: zabbix_agentd-windows.conf.j2
+    dest: "{{ ansible_env.ProgramData }}/zabbix/zabbix_agentd.conf"
+    backup: yes
+  notify: restart zabbix-agent windows service
+  changed_when: True
+  tags: [zabbix]

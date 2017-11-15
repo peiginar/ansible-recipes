@@ -1,6 +1,11 @@
+- name: set zabbix repository url
+  set_fact:
+    zabbix_repo_url: "https://repo.zabbix.com/zabbix-official-repo.key"
+  tags: [common, aptinstall, aptrepo, zabbix]
+
 - name: add apt key zabbix
   apt_key:
-    url: "https://repo.zabbix.com/zabbix-official-repo.key"
+    url: "{{ zabbix_repo_url }}"
     state: present
     validate_certs: no
   tags: [common, aptinstall, aptrepo, zabbix]
@@ -8,17 +13,19 @@
     http_proxy: "{{ http_auth_proxy }}"
     https_proxy: "{{ http_auth_proxy }}"
     no_proxy: "localhost,.{{ dns_domain }}"
+  when: http_auth_proxy|default('')|length() > 0
+
+- name: add apt key zabbix nouse proxy
+  apt_key:
+    url: "{{ zabbix_repo_url }}"
+    state: present
+    validate_certs: no
+  tags: [common, aptinstall, aptrepo, zabbix]
+  when: http_auth_proxy|default('')|length() == 0
 
 - name: add apt repository zabbix
   apt_repository:
     repo: "deb http://repo.zabbix.com/zabbix/3.4/ubuntu {{ ansible_distribution_release }} main"
-    filename: 'zabbix'
-    state: present
-  tags: [common, aptinstall, aptrepo, zabbix]
-
-- name: add apt repository zabbix source
-  apt_repository:
-    repo: "deb-src http://repo.zabbix.com/zabbix/3.4/ubuntu {{ ansible_distribution_release }} main"
     filename: 'zabbix'
     state: present
   tags: [common, aptinstall, aptrepo, zabbix]

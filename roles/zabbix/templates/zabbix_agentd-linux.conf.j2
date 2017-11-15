@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=50
+Server=0.0.0.0/0
+ServerActive={{ zabbix_server }}
+HostnameItem=system.hostname
+HostMetadataItem=system.uname
+Include=/etc/zabbix/zabbix_agentd.d/*.conf

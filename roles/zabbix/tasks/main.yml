@@ -1,0 +1,11 @@
+- include: zabbix_agent.yml
+  when: ansible_system == "Linux" and zabbix_server is defined
+
+- include: zabbix_agent-windows.yml
+  when: ansible_os_family == "Windows" and zabbix_server is defined and zabbix_agent_uninstall is not defined
+
+#- include: zabbix_agent-choco.yml
+#  when: ansible_os_family == "Windows" and zabbix_server is defined and zabbix_agent_uninstall is not defined
+
+- include: zabbix_agent-windows-uninstall.yml
+  when: ansible_os_family == "Windows" and zabbix_server is defined and zabbix_agent_uninstall is defined

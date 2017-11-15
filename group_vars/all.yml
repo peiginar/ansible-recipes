@@ -1,11 +1,10 @@
 ansible_become: yes
 #ansible_python_interpreter: /usr/bin/python3
-ansible_user: ubuntu
+#ansible_user: ubuntu
 apt_cache_validate_time: 600
 dns_domain: example.localnet
 ntp_servers:
-  - ntp1.jst.mfeed.ad.jp
-  - ntp2.jst.mfeed.ad.jp
+  - ntp.jst.mfeed.ad.jp
 ldap_uri: ldap://192.168.1.253/
 ldap_base: dc=example,dc=local
 ldap_test_uid: 1025
@@ -14,11 +13,14 @@ http_proxy_server: 172.16.67.219
 http_proxy_user: user
 http_proxy_pass: pass
 http_proxy: "http://{{ http_proxy_server }}:3128/"
+http_auth_proxy: "{{ http_proxy }}"
 apt_http_proxy: "http://{{ http_proxy_server }}:3142/"
-apt_https_proxy: "http://{{ http_proxy_server }}:3128/"
+apt_https_proxy: "{{ http_auth_proxy }}"
 nfs_autofs:
   - { mapkey: share, dest: pub, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/srv/pub" }
   - { mapkey: share, dest: tmp, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/srv/tmp" }
   - { mapkey: share, dest: home, opt: '-rw,soft,intr', src: "{{ nfs_server }}:/home" }
 sudoers_users: '%ateam'
+zabbix_server_root: "xzabbix.{{ dns_domain }}"
+#zabbix_server: "{{ zabbix_server_root }}"
 apt_extra_packages: []

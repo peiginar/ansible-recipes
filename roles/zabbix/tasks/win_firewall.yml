@@ -1,0 +1,11 @@
+- name: Get Firewall rule to allow zabbix-agent
+  win_shell: Get-NetFirewallPortFilter -Protocol TCP | where Localport -eq 10050
+  register: firewall_zabbix_agent_allow
+  changed_when: False
+  tags: [firewall, zabbix]
+
+- name: Firewall rule to allow zabbix-agent
+  win_shell: >
+    New-NetFirewallRule -Protocol TCP -LocalPort 10050 -Direction Inbound -Action Allow -DisplayName zabbix_agent-in
+  when: firewall_zabbix_agent_allow.stdout.strip() == ""
+  tags: [firewall, zabbix]

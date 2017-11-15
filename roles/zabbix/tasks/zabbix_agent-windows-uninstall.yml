@@ -1,0 +1,10 @@
+- name: uninstall zabbix agent
+  win_shell: \
+    Get-Service -Name "Zabbix Agent"| Stop-Service;
+    $service = Get-WmiObject win32_service | Where-Object { $_.Name -eq "Zabbix Agent" };
+    if ($service) { $service.delete() }
+    Remove-Item -Recurse "{{ ansible_env.ProgramFiles }}\\Zabbix Agent";
+    Remove-Item -Recurse "{{ ansible_env.ProgramData }}/zabbix";
+    Remove-Item -Recurse "{{ win_ansible_work }}/zabbix_agents*";
+  when: zabbix_agent_uninstall is defined
+  tags: [zabbix]

@@ -1,0 +1,83 @@
+- name: set zabbix package version
+  set_fact:
+    zabbix_version: "3.4.0"
+  tags: [zabbix]
+
+- name: set zabbix package names
+  set_fact:
+    zabbix_agents: "zabbix_agents_{{ zabbix_version }}"
+    zabbix_agents_tmp: "{{ win_ansible_work }}/zabbix_agents_{{ zabbix_version }}"
+  tags: [zabbix]
+
+- name: set windows archtecture win32
+  set_fact:
+    winarch: "win32"
+  when: ansible_env.PROCESSOR_ARCHITECTURE.find('32') != -1
+  tags: [zabbix]
+
+- name: set windows archtecture win64
+  set_fact:
+    winarch: "win64"
+  when: ansible_env.PROCESSOR_ARCHITECTURE.find('64') != -1
+  tags: [zabbix]
+
+- name: download zabbix package
+  win_get_url:
+    url: "https://www.zabbix.com/downloads/{{ zabbix_version }}/{{ zabbix_agents }}.win.zip"
+    dest: "{{ win_ansible_work }}"
+    proxy_url: "{{ win_http_proxy }}"
+    force: no
+  tags: [zabbix]
+
+- name: unzip zabbix package
+  win_unzip:
+    src: "{{ zabbix_agents_tmp }}.win.zip"
+    dest: "{{ zabbix_agents_tmp }}"
+    creates: "{{ zabbix_agents_tmp }}"
+  tags: [zabbix]
+
+- name: create zabbix bin folder
+  win_file:
+    path: "{{ ansible_env.ProgramFiles }}\\Zabbix Agent"
+    state: directory
+  tags: [zabbix]
+
+- name: create zabbix data folder
+  win_file:
+    path: "{{ ansible_env.ProgramData }}/zabbix"
+    state: directory
+  tags: [zabbix]
+
+- name: copy zabbix agent config default file
+  win_shell: cp "{{ zabbix_agents_tmp }}/conf/zabbix_agentd.win.conf" "{{ ansible_env.ProgramData }}/zabbix"
+  args:
+    creates: "{{ ansible_env.ProgramData }}/zabbix/zabbix_agentd.win.conf"
+  tags: [zabbix]
+
+- name: copy zabbix binary files
+  win_shell: cp "{{ zabbix_agents_tmp }}/bin/{{ winarch }}/*.exe" "{{ ansible_env.ProgramFiles }}/Zabbix Agent"
+  args:
+    creates: "{{ ansible_env.ProgramFiles }}/Zabbix Agent/zabbix_agentd.exe"
+  tags: [zabbix]
+
+- name: check zabbix agent service
+  win_shell: Get-Service -Name "Zabbix Agent"
+  register: get_service_zabbix_agent
+  ignore_errors: yes
+  changed_when: False
+  tags: [zabbix]
+
+- name: zabbix agent service install
+  win_shell: '& "{{ ansible_env.ProgramFiles }}/Zabbix Agent/zabbix_agentd.exe" --install --config {{ ansible_env.ProgramData }}/zabbix/zabbix_agentd.conf'
+  when: get_service_zabbix_agent.rc != 0
+  tags: [zabbix]
+
+- name: setup zabbix_agentd.conf
+  template:
+    src: zabbix_agentd-windows.conf.j2
+    dest: "{{ ansible_env.ProgramData }}/zabbix/zabbix_agentd.conf"
+    backup: yes
+  notify: restart zabbix-agent windows service
+  tags: [zabbix]
+
+- import_tasks: win_firewall.yml

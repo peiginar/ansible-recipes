@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+LogFile=c:\zabbix_agentd.log
+LogFileSize=50
+Server={{ zabbix_servers_accept|default('0.0.0.0/0') }}
+ServerActive={{ zabbix_server }}
+HostnameItem=system.hostname
+HostMetadataItem=system.uname

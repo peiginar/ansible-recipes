@@ -120,11 +120,11 @@
     state: present
   tags: choco_install
 
-- name: chocolatey javaruntime uninstall
-  win_chocolatey:
-    name: javaruntime
-    state: absent
-  tags: choco_install
+#- name: chocolatey javaruntime uninstall
+#  win_chocolatey:
+#    name: javaruntime
+#    state: absent
+#  tags: choco_install
 
 - name: chocolatey install
   win_chocolatey:

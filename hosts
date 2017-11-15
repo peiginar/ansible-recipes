@@ -8,6 +8,12 @@
 [desktop]
 localhost ansible_user="{{lookup('env','LOGNAME')}}"
 
+#[server:vars]
+#ansible_user=ubuntu
+#ansible_sudo_pass=ubuntu
+#ansible_password=ubuntu
+#ansible_connection=paramiko
+
 [server]
 
 [linux:children]

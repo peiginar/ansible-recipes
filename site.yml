@@ -3,8 +3,11 @@
     - debug
     - common
     - ldapclient
+    - zabbix
 
 - hosts: windows
+  #serial: 1
   roles:
     - debug
     - windows
+    - zabbix
