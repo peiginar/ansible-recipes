@@ -27,7 +27,7 @@
 #  when: reg_proxy.stdout.strip() != "0"
 
 - name: netsh show http proxy
-  win_shell: netsh winhttp show proxy
+  win_shell: chcp 437; netsh winhttp show proxy
   register: netsh_http_proxy
   changed_when: False
   tags: nethttp
