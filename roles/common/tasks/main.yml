@@ -37,8 +37,26 @@
     line: 'search {{ dns_domain }}'
     create: yes
   changed_when: True
-  when: search_domain_result|failed
+  when: search_domain_result|failed and ansible_distribution_major_version < "18"
   notify: update resolvconf
+  tags: [common, resolvconf]
+
+- name: Set resolv.onf dns server systemd
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^DNS='
+    line: 'DNS={{ dns_server }}'
+  when: dns_server is defined and ansible_distribution_major_version >= "18"
+  notify: update systemd_resolved
+  tags: [common, resolvconf]
+
+- name: Set resolv.onf dns search systemd
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^Domains='
+    line: 'Domains={{ dns_domain }}'
+  when: ansible_distribution_major_version >= "18"
+  notify: update systemd_resolved
   tags: [common, resolvconf]
 
 - name: apt install

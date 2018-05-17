@@ -8,5 +8,6 @@ choco_packages:
   - VisualStudioCode
   - putty.install
   - winscp.install
-  - python2
+  - python3
   - adobereader
+  - notepadplusplus.install

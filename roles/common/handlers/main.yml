@@ -6,3 +6,8 @@
   service: name=autofs state=restarted
 - name: restart ntp
   service: name=ntp state=restarted
+- name: update systemd_resolved
+  systemd:
+    name: systemd-resolved.service
+    state: restarted
+    daemon_reload: yes
