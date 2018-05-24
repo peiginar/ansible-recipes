@@ -1,4 +1,4 @@
-- include: aptproxy.yml
+- import_tasks: aptproxy.yml
 
 - name: Get hostname
   shell: hostname
@@ -20,7 +20,7 @@
     line: '127.0.1.1 {{ hostname.stdout }}'
     state: present
     create: yes
-  when: search_hosts_result|failed
+  when: search_hosts_result is failed
   tags: [common, hostname]
 
 - name: Search resolv.conf dns search
@@ -30,18 +30,18 @@
   changed_when: False
   tags: [common, resolvconf]
 
-- name: Set resolv.onf dns search
+- name: Set resolv.conf dns search
   lineinfile:
     dest: /etc/resolvconf/resolv.conf.d/base
     regexp: '^search'
     line: 'search {{ dns_domain }}'
     create: yes
   changed_when: True
-  when: search_domain_result|failed and ansible_distribution_major_version < "18"
+  when: search_domain_result is failed and ansible_distribution_major_version < "18"
   notify: update resolvconf
   tags: [common, resolvconf]
 
-- name: Set resolv.onf dns server systemd
+- name: Set resolv.conf dns server systemd
   lineinfile:
     dest: /etc/systemd/resolved.conf
     regexp: '^DNS='
@@ -50,12 +50,12 @@
   notify: update systemd_resolved
   tags: [common, resolvconf]
 
-- name: Set resolv.onf dns search systemd
+- name: Set resolv.conf dns search systemd
   lineinfile:
     dest: /etc/systemd/resolved.conf
     regexp: '^Domains='
     line: 'Domains={{ dns_domain }}'
-  when: ansible_distribution_major_version >= "18"
+  when: search_domain_result is failed and ansible_distribution_major_version >= "18"
   notify: update systemd_resolved
   tags: [common, resolvconf]
 
@@ -129,7 +129,7 @@
 
 - name: Update default locale
   shell: update-locale LANG="ja_JP.UTF-8"
-  when: result|failed
+  when: result is failed
   tags: [common, locale]
 
 - name: create skel .vimrc
@@ -155,7 +155,7 @@
   with_items: "{{ sudoers_users }}"
   tags: [common, sudoers]
 
-- include: autofs.yml
+- import_tasks: autofs.yml
   when: ansible_virtualization_type is defined and ansible_virtualization_type != "lxc"
   tags: [common, autofs]
 
@@ -169,4 +169,4 @@
   when: ldap_mkhomedir is defined
   tags: [common, autofs]
 
-- include: ntp.yml
+- import_tasks: ntp.yml

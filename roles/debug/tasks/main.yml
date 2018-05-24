@@ -3,11 +3,23 @@
   when: ansible_os_family != "Windows" and ansible_virtualization_type in ('VMware', 'kvm', 'lxc')
   tags: debug
 
-#- name: show nfs_autofs
-#  debug:
-#    msg: "{{ item.mapkey }}: {{ item.dest }} {{ item.opt }} {{ item.src }}"
-#  with_items: '{{ nfs_autofs }}'
-#  tags: debug
+- name: show nfs_autofs
+  debug:
+    msg: "{{ item.mapkey }}: {{ item.dest }} {{ item.opt }} {{ item.src }}"
+  with_items: '{{ nfs_autofs }}'
+  tags: debug
+
+- name: show ldap enabled
+  debug:
+    var: ldap_client_enable
+  when: ldap_client_enable|default(true)
+  tags: debug
+
+- name: show ldap distribution version
+  debug:
+    var: ansible_distribution_major_version
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_major_version >= "18"
+  tags: debug
 
 #- name: show sudoers_users
 #  debug:

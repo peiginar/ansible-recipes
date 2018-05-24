@@ -58,7 +58,7 @@
 #  when: firewall_ping_allow.stdout.strip()| search('Enabled:.*No$')
 #  tags: firewall
 
-- include: windows10.yml
+- import_tasks: windows10.yml
   when: ansible_distribution_major_version|int >= 10
 
 - name: Check chocolatey Installed
@@ -125,12 +125,6 @@
 #    name: javaruntime
 #    state: absent
 #  tags: choco_install
-
-- name: chocolatey python2 uninstall
-  win_chocolatey:
-    name: python2
-    state: absent
-  tags: choco_install
 
 - name: chocolatey install
   win_chocolatey:

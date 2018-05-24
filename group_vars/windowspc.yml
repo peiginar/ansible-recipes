@@ -11,3 +11,4 @@ choco_packages:
   - python3
   - adobereader
   - notepadplusplus.install
+  - 7zip.install

@@ -1,0 +1,56 @@
+- name: copy powercfg setting
+  win_copy:
+    src: ../files/CustomPlan.pow
+    dest: "{{ win_ansible_work }}\\"
+  register: pow_copy_result
+
+- name: get current powercfg setting
+  win_shell: powercfg.exe /getactivescheme
+  register: pow_act_scheme
+  changed_when: False
+
+## powercfg - override setting CustomPlan
+
+- name: powercfg check exists customplan
+  set_fact:
+    pow_act_scheme_guid: "{{ pow_act_scheme.stdout.strip().split()[2] }}"
+  when: pow_act_scheme.stdout.strip().find('CustomPlan') >= 0
+
+- name: powercfg show act scheme guid
+  debug:
+    msg: "{{ pow_act_scheme_guid }} changed:{{ pow_copy_result.changed }}"
+  when: pow_act_scheme_guid is defined
+
+- name: import act scheme guid override
+  win_shell: powercfg.exe -import "{{ win_ansible_work }}\\CustomPlan.pow" "{{ pow_act_scheme_guid }}"
+  when: pow_act_scheme_guid is defined and pow_copy_result.changed
+
+## powercfg - new setting CustomPlan
+
+- name: powercfg check not exists customplan
+  set_fact:
+    pow_add_custom_scheme: True
+  when: pow_act_scheme.stdout.strip().find('CustomPlan') < 0
+
+- name: copy powercfg setting
+  win_shell: powercfg.exe -import "{{ win_ansible_work }}\\CustomPlan.pow"
+  register: pow_new_scheme
+  when: pow_add_custom_scheme is defined
+
+- name: powercfg set new scheme guid
+  set_fact:
+    pow_new_scheme_guid: "{{ pow_new_scheme.stdout.strip().split()[-1] }}"
+  when: pow_add_custom_scheme is defined
+
+- name: powercfg show new scheme guid
+  debug:
+    var: pow_new_scheme_guid
+  when: pow_add_custom_scheme is defined
+
+- name: powercfg changename new scheme
+  win_shell: powercfg.exe -changename "{{ pow_new_scheme_guid }}" "CustomPlan"
+  when: pow_add_custom_scheme is defined and pow_new_scheme_guid|length() > 0
+
+- name: powercfg activate new scheme
+  win_shell: powercfg.exe /setactive "{{ pow_new_scheme_guid }}"
+  when: pow_add_custom_scheme is defined and pow_new_scheme_guid|length() > 0

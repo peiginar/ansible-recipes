@@ -1,3 +1,5 @@
+- name: enable zabbix-agent
+  shell: /usr/sbin/update-rc.d zabbix-agent enable
 - name: restart zabbix-agent
   service: name=zabbix-agent state=restarted
 - name: restart zabbix-agent windows service

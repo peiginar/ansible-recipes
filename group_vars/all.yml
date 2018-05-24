@@ -1,10 +1,11 @@
 ansible_become: yes
-#ansible_python_interpreter: /usr/bin/python3
+ansible_python_interpreter: /usr/bin/python3
 #ansible_user: ubuntu
 apt_cache_validate_time: 600
 dns_domain: example.localnet
 ntp_servers:
   - ntp.jst.mfeed.ad.jp
+ldap_client_enable: true
 ldap_uri: ldap://192.168.1.253/
 ldap_base: dc=example,dc=local
 ldap_test_uid: 1025

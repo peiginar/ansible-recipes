@@ -20,7 +20,7 @@
 - name: Firewall rule to allow ping
   win_shell: Get-NetFirewallRule -Direction Inbound| where DisplayName -Like "ファイル*ICMPv4*" | \
     Set-NetFirewallRule -Enabled True -Action Allow
-  when: "{{ 'False' in firewall_ping_allow.stdout_lines }}"
+  when: firewall_ping_allow.stdout.find('False') != -1
   tags: firewall
 
 - name: Get Firewall rule to allow RDP
@@ -33,7 +33,7 @@
 - name: Firewall rule to allow RDP
   win_shell: Get-NetFirewallRule| where Name -Like "RemoteDesktop-UserMode-In-TCP*" | \
     Set-NetFirewallRule -Enabled True -Action Allow
-  when: "{{ 'False' in firewall_rdp_allow.stdout_lines }}"
+  when: firewall_rdp_allow.stdout.find('False') != -1
   tags: firewall
 
 - name: settings
@@ -58,3 +58,6 @@
       data: "{{ ntp_servers[0] }},0x9"
       datatype: string
   tags: win_settings
+
+- import_tasks: powercfg.yml
+  tags: powercfg
