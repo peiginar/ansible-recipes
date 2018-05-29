@@ -10,9 +10,9 @@ ldap_uri: ldap://192.168.1.253/
 ldap_base: dc=example,dc=local
 ldap_test_uid: 1025
 nfs_server: "nfs.{{ dns_domain }}"
-http_proxy_server: 172.16.67.219
-http_proxy_user: user
-http_proxy_pass: pass
+http_proxy_server: 172.16.67.119
+#http_proxy_user: user
+#http_proxy_pass: pass
 http_proxy: "http://{{ http_proxy_server }}:3128/"
 http_auth_proxy: "{{ http_proxy }}"
 apt_http_proxy: "http://{{ http_proxy_server }}:3142/"
