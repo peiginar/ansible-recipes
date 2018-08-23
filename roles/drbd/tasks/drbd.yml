@@ -1,0 +1,66 @@
+- name: Set servers in hosts
+  lineinfile:
+    dest: /etc/hosts
+    insertafter: 'EOF'
+    line: "{{ item }}"
+    state: present
+  with_items: '{{ drbd_servers }}'
+
+- name: find hostname in hosts
+  shell: "grep $(hostname) /etc/hosts| grep -v -e ^# -e ^127.0"
+  register: find_myhostname_result
+  changed_when: False
+
+- name: remove loopback myhostname in hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127.0.*{{ ansible_hostname }}'
+    state: absent
+  when: find_myhostname_result.rc == 0
+
+- name: install utils packages
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - gdisk
+    - software-properties-common
+
+- name: check disk partition
+  shell: "sgdisk -i1 {{ drbd_disk_path }}"
+  register: check_disk_partition
+  changed_when: False
+
+- name: create disk partition
+  shell: "sgdisk -n 1:0:0 -t 1:8e00 {{ drbd_disk_path }}"
+  when: check_disk_partition.rc == 0 and check_disk_partition.stdout.find('does not exist') != -1
+
+- name: LVM VG Create
+  lvg: vg=drbdpool pvs="{{ drbd_disk_path }}1"
+
+- name: set DRBD 9 repository url
+  set_fact:
+    drbd_repo_url: 'ppa:linbit/linbit-drbd9-stack'
+
+- name: DRBD 9 Repository Add. use proxy.
+  apt_repository:
+    repo: "{{drbd_repo_url}}"
+    filename: 'drbd9'
+    state: present
+  environment:
+    http_proxy: "{{ http_auth_proxy }}"
+    https_proxy: "{{ http_auth_proxy }}"
+    no_proxy: "localhost,.{{ dns_domain }}"
+  when: http_auth_proxy|default('')|length() > 0
+
+- name: DRBD 9 Repository Add. direct connect.
+  apt_repository:
+    repo: "{{drbd_repo_url}}"
+    filename: 'drbd9'
+    state: present
+  when: http_auth_proxy|default('')|length() == 0
+
+- name: DRBD 9 & DRBD Manage Install
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - drbd-utils
+    - python-drbdmanage
+    - drbd-dkms
