@@ -1,0 +1,55 @@
+totem {
+        version: 2
+        cluster_name: cluster0
+        token: 3000
+        token_retransmits_before_loss_const: 10
+        clear_node_high_bit: yes
+        secauth: off
+        crypto_cipher: none
+        crypto_hash: none
+        {% for ring in corosync_rings %}
+
+        interface {
+                ringnumber: {{ ring.id }}
+                bindnetaddr: {{ (ring.nodes[0].addr.split('.')[0:3]|join('.')) + '.0' }}
+                mcastport: {{ 5405 + ring.id| int }}
+                ttl: 1
+        }
+        {% endfor %}
+}
+nodelist {
+        {% for ring in corosync_rings %}
+        {% for node in ring.nodes %}
+
+        node {
+                ring{{ ring.id }}_addr: {{ node.addr }}
+                name: {{ node.name }}
+                nodeid: {{ node.nodeid }}
+        }
+
+        {% endfor %}
+        {% endfor %}
+}
+logging {
+        fileline: off
+        to_stderr: no
+        to_logfile: no
+        to_syslog: yes
+        syslog_facility: daemon
+        debug: off
+        timestamp: on
+        logger_subsys {
+                subsys: QUORUM
+                debug: off
+        }
+}
+
+quorum {
+        provider: corosync_votequorum
+        #expected_votes: 2
+        two_node: 1
+        wait_for_all: 1
+        last_man_standing: 1
+        auto_tie_breaker: 0
+}
+# vim: set ts=8 ts=8 et:
