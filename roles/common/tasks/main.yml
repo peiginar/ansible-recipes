@@ -46,7 +46,7 @@
     dest: /etc/systemd/resolved.conf
     regexp: '^DNS='
     line: 'DNS={{ dns_server }}'
-  when: dns_server is defined and ansible_distribution_major_version >= "18"
+  when: dns_server is defined and ansible_distribution_major_version >= "18" and resolved_enable|default(true)
   notify: update systemd_resolved
   tags: [common, resolvconf]
 
@@ -55,7 +55,7 @@
     dest: /etc/systemd/resolved.conf
     regexp: '^Domains='
     line: 'Domains={{ dns_domain }}'
-  when: search_domain_result is failed and ansible_distribution_major_version >= "18"
+  when: search_domain_result is failed and ansible_distribution_major_version >= "18" and resolved_enable|default(true)
   notify: update systemd_resolved
   tags: [common, resolvconf]
 
@@ -75,21 +75,23 @@
     - htop
     - parted
     - gdisk
+    - avahi-daemon
+    - gpg
     - "{{ apt_extra_packages }}"
   async: 180
   poll: 5
   tags: [common, aptinstall]
 
-- name: apt install not lxc
-  apt:
-    name: "{{item}}"
-    state: latest
-    update_cache: yes
-    cache_valid_time: "{{ apt_cache_validate_time }}"
-  with_items:
-    - avahi-daemon
-  when: ansible_virtualization_type is defined and ansible_virtualization_type != "lxc"
-  tags: [common, aptinstall]
+#- name: apt install not lxc
+#  apt:
+#    name: "{{item}}"
+#    state: latest
+#    update_cache: yes
+#    cache_valid_time: "{{ apt_cache_validate_time }}"
+#  with_items:
+#    - avahi-daemon
+#  when: ansible_virtualization_type is defined and ansible_virtualization_type != "lxc"
+#  tags: [common, aptinstall]
 
 - name: Update all packages to the latest version
   apt:
