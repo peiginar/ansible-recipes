@@ -4,14 +4,16 @@ drbd_servers:
   - 192.168.45.243 getten43
   - 192.168.45.244 getten44
 drbd_disk_path: /dev/sdb
+corosync_cluster_name: cluster00
+corosync_servers: [ getten41, getten42 ]
 corosync_rings:
   - id: 0
     nodes:
-      - nodeid: 0
-        addr: 172.16.67.231
-        name: blue1
       - nodeid: 1
-        addr: 172.16.67.232
-        name: blue2
+        addr: 192.168.45.241
+        name: getten41
+      - nodeid: 2
+        addr: 192.168.45.242
+        name: getten42
 
 # vim: set ts=2 sw=2 et:

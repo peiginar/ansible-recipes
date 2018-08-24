@@ -1,6 +1,6 @@
 totem {
         version: 2
-        cluster_name: cluster0
+        cluster_name: {{ corosync_cluster_name }}
         token: 3000
         token_retransmits_before_loss_const: 10
         clear_node_high_bit: yes
@@ -10,6 +10,13 @@ totem {
         {% for ring in corosync_rings %}
 
         interface {
+
+                {% for node in ring.nodes %}
+                member {
+                        memberaddr: {{ node.addr }}
+                }
+                {% endfor %}
+
                 ringnumber: {{ ring.id }}
                 bindnetaddr: {{ (ring.nodes[0].addr.split('.')[0:3]|join('.')) + '.0' }}
                 mcastport: {{ 5405 + ring.id| int }}
@@ -52,4 +59,4 @@ quorum {
         last_man_standing: 1
         auto_tie_breaker: 0
 }
-# vim: set ts=8 ts=8 et:
+# vim: set ts=8 sw=8 et:

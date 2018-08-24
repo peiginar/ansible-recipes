@@ -1,3 +1,7 @@
+- name: show drbd leader
+  debug:
+    msg: 'Leader drbd servers: {{ drbd_servers[0] }}'
+
 - name: Set servers in hosts
   lineinfile:
     dest: /etc/hosts
@@ -23,6 +27,12 @@
   with_items:
     - gdisk
     - software-properties-common
+    - zfsutils-linux
+
+- name: install lvm2
+  apt: name=lvm2 state=present
+  #changed_when: True
+  notify: lvm2-lvmetad enable
 
 - name: check disk partition
   shell: "sgdisk -i1 {{ drbd_disk_path }}"

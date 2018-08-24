@@ -11,3 +11,9 @@
     - debug
     - windows
     - zabbix
+
+- hosts: hacluster
+  roles:
+    - debug
+    - corosync
+    - drbd

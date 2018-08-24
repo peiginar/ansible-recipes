@@ -1,0 +1,5 @@
+- name: lvm2-lvmetad enable
+  systemd:
+    name: lvm2-lvmetad.service
+    enabled: yes
+    #state: started
