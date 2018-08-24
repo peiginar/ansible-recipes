@@ -23,15 +23,22 @@
   when: find_myhostname_result.rc == 0
 
 - name: install utils packages
-  apt: name={{ item }} state=present update_cache=yes
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
   with_items:
     - gdisk
     - software-properties-common
     - zfsutils-linux
 
 - name: install lvm2
-  apt: name=lvm2 state=present
-  #changed_when: True
+  apt: 
+    name: lvm2
+    state: present
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
   notify: lvm2-lvmetad enable
 
 - name: check disk partition
@@ -69,8 +76,21 @@
   when: http_auth_proxy|default('')|length() == 0
 
 - name: DRBD 9 & DRBD Manage Install
-  apt: name={{ item }} state=present update_cache=yes
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
   with_items:
     - drbd-utils
     - python-drbdmanage
     - drbd-dkms
+
+- name: DRBD 9 get drbdadm api version
+  shell: drbdadm --version| grep DRBDADM_API_VERSION
+  register: drbdadm_api_version
+  changed_when: False
+
+- name: DRBD 9 assert drbdadm api version
+  shell: /bin/false
+  when: drbdadm_api_version.stdout != 'DRBDADM_API_VERSION=2'
