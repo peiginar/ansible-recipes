@@ -1,0 +1,44 @@
+# storage-plugin = drbdmanage.storage.zvol.Zvol
+
+- name: check zvol for dbrdpool
+  shell: "ls {{ drbdctrl_dev_path }} >/dev/null 2>&1"
+  register: check_zvol
+  changed_when: False
+  ignore_errors: yes
+
+- name: create zvol for dbrdpool
+  shell: "zfs create -V 32M $(echo {{ drbdctrl_dev_path }}| sed 's!.*zvol/!!')"
+  when: check_zvol.rc != 0
+
+- name: test exists disk device
+  shell: "ls {{ drbdpool_dev_root }} 2>/dev/null| cat"
+  register: ls_disk_device
+  changed_when: False
+
+- name: check disk partition
+  shell: "sgdisk -i1 {{ drbdpool_dev_root }}"
+  register: ls_disk_part
+  changed_when: False
+  when: ls_disk_device.stdout|length != 0
+
+- name: create disk partition
+  shell: "sgdisk -n 1:0:0 -t 1:bf01 {{ drbdpool_dev_root }}"
+  when: ls_disk_device.stdout|length != 0 and ls_disk_part.rc == 0 and ls_disk_part.stdout.find('does not exist') != -1
+
+- name: check zpool drbdpool
+  shell: "zfs list -t all|grep {{ drbdpool_zpool }}|cat"
+  register: check_zpool_drbdpool
+  changed_when: False
+
+- name: create drbdpool as zfs
+  shell: "zfs create -o mountpoint=none {{ drbdpool_zpool }}"
+  when: check_zpool_drbdpool.stdout|length == 0 and drbdpool_zpool.find('/') >= 0
+
+- name: create drbdpool as zpool
+  shell: "zpool create -f {{ drbdpool_zpool }} {{ drbdpool_dev_path }} && zfs set mountpoint=none {{ drbdpool_zpool }}"
+  when: check_zpool_drbdpool.stdout|length == 0 and drbdpool_zpool.find('/') < 0
+
+- name: LVM VG Create
+  lvg: vg=drbdpool pvs="{{ drbdctrl_dev_path }}"
+
+# vim: set ts=2 sw=2 et:

@@ -1,2 +1,8 @@
 - import_tasks: drbd.yml
   tags: [ drbd ]
+- import_tasks: drbd-lvm.yml
+  when: drbd_storage is not defined or drbd_storage == "lvm"
+  tags: [ drbd ]
+- import_tasks: drbd-zfs.yml
+  when: drbd_storage|default('') == "zfs"
+  tags: [ drbd ]

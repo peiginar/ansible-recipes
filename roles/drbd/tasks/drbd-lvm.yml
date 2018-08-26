@@ -1,0 +1,19 @@
+- name: install lvm2
+  apt: 
+    name: lvm2
+    state: present
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
+  notify: lvm2-lvmetad enable
+
+- name: check disk partition
+  shell: "sgdisk -i1 {{ drbdpool_dev_root }}"
+  register: check_disk_partition
+  changed_when: False
+
+- name: create disk partition
+  shell: "sgdisk -n 1:0:0 -t 1:8e00 {{ drbdpool_dev_root }}"
+  when: check_disk_partition.rc == 0 and check_disk_partition.stdout.find('does not exist') != -1
+
+- name: LVM VG Create
+  lvg: vg=drbdpool pvs="{{ drbdpool_dev_path }}"

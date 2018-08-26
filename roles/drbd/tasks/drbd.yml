@@ -1,14 +1,28 @@
-- name: show drbd leader
-  debug:
-    msg: 'Leader drbd servers: {{ drbd_servers[0] }}'
+- name: set leader nodes
+  set_fact:
+    drbd_leader_node:
+      "{{ drbd_nodes|selectattr('leader', 'defined')|map(attribute='name')|list|join('') }}"
+
+- name: set mynode ipv4 address
+  set_fact:
+    drbd_node_ipv4_address:
+      "{{ drbd_nodes|selectattr('name', 'equalto', inventory_hostname_short)|map(attribute='addr')|list|join('') }}"
+
+- name: Set authorized key for user root/ubuntu copying it from current user
+  authorized_key:
+    user: "{{ item }}"
+    state: present
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+  with_items: [ 'root', '{{ ansible_user }}' ]
+  tags: 'sshkey'
 
 - name: Set servers in hosts
   lineinfile:
     dest: /etc/hosts
     insertafter: 'EOF'
-    line: "{{ item }}"
+    line: "{{ item.addr }} {{ item.name }}"
     state: present
-  with_items: '{{ drbd_servers }}'
+  with_items: '{{ drbd_nodes }}'
 
 - name: find hostname in hosts
   shell: "grep $(hostname) /etc/hosts| grep -v -e ^# -e ^127.0"
@@ -32,26 +46,6 @@
     - gdisk
     - software-properties-common
     - zfsutils-linux
-
-- name: install lvm2
-  apt: 
-    name: lvm2
-    state: present
-    update_cache: yes
-    cache_valid_time: "{{ apt_cache_validate_time }}"
-  notify: lvm2-lvmetad enable
-
-- name: check disk partition
-  shell: "sgdisk -i1 {{ drbd_disk_path }}"
-  register: check_disk_partition
-  changed_when: False
-
-- name: create disk partition
-  shell: "sgdisk -n 1:0:0 -t 1:8e00 {{ drbd_disk_path }}"
-  when: check_disk_partition.rc == 0 and check_disk_partition.stdout.find('does not exist') != -1
-
-- name: LVM VG Create
-  lvg: vg=drbdpool pvs="{{ drbd_disk_path }}1"
 
 - name: set DRBD 9 repository url
   set_fact:
@@ -94,3 +88,10 @@
 - name: DRBD 9 assert drbdadm api version
   shell: /bin/false
   when: drbdadm_api_version.stdout != 'DRBDADM_API_VERSION=2'
+
+#- name: DRBD 9 join node
+#  shell: "drbdmanage howto-join {{ inventory_hostname_short }}"
+#  register: howto_join
+#  delegate_to: "{{ drbd_leader_node }}"
+
+# vim: set ts=2 sw=2 et:
