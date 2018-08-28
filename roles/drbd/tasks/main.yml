@@ -6,3 +6,6 @@
 - import_tasks: drbd-zfs.yml
   when: drbd_storage|default('') == "zfs"
   tags: [ drbd ]
+- import_tasks: drbd-zfs2.yml
+  when: drbd_storage|default('') == "zfs2"
+  tags: [ drbd ]

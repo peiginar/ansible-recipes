@@ -3,8 +3,6 @@ drbd_nodes:
   - { name: red42, addr: 172.16.67.242, storage: zfs}
   - { name: red43, addr: 172.16.67.243, storage: zfs}
   - { name: red44, addr: 172.16.67.244, storage: none, client: True}
-drbdctrl_dev_path: /dev/zvol/rpool/dbrdctrl
-drbdpool_zpool: rpool/drbdpool
 drbdpool_dev_root: /dev/sdb
 drbdpool_dev_path: "{{ drbdpool_dev_root }}1"
 corosync_cluster_name: cluster00

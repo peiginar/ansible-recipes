@@ -1,0 +1,32 @@
+# storage-plugin = drbdmanage.storage.zvol.Zvol
+
+- name: set drbdctrl zpool name
+  set_fact:
+    drbdctrl_dev_path: /dev/zvol/rpool/dbrdctrl
+
+- name: check zvol for dbrdpool
+  shell: "ls {{ drbdctrl_dev_path }} >/dev/null 2>&1"
+  register: check_zvol
+  changed_when: False
+  ignore_errors: yes
+
+- name: create zvol for dbrdpool
+  shell: "zfs create -V 128M $(echo {{ drbdctrl_dev_path }}| sed 's!.*zvol/!!')"
+  when: check_zvol.rc != 0
+
+- name: set drbdpool zpool name
+  set_fact: drbdpool_zpool="rpool/drbdpool" 
+
+- name: check zpool drbdpool
+  shell: "zfs list -t all|grep {{ drbdpool_zpool }}|cat"
+  register: check_zpool_drbdpool
+  changed_when: False
+
+- name: create drbdpool as zfs
+  shell: "zfs create -o mountpoint=none {{ drbdpool_zpool }}"
+  when: check_zpool_drbdpool.stdout|length == 0
+
+- name: LVM VG Create
+  lvg: vg=drbdpool pvs="{{ drbdctrl_dev_path }}"
+
+# vim: set ts=2 sw=2 et:
