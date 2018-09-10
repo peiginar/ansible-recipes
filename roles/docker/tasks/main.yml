@@ -1,0 +1,11 @@
+- import_tasks: docker.yml
+  environment:
+    http_proxy: "{{ http_auth_proxy }}"
+    https_proxy: "{{ http_auth_proxy }}"
+    no_proxy: "localhost,.{{ dns_domain }}"
+  when: http_auth_proxy|default('')|length() > 0
+  tags: [ docker ]
+
+- import_tasks: docker.yml
+  when: http_auth_proxy|default('')|length() == 0
+  tags: [ docker ]
