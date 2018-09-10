@@ -1,3 +1,7 @@
+# storage-plugin = drbdmanage.storage.lvm_thinlv.LvmThinLv
+# [Plugin:ThinLV]
+# pool-name = volpool
+
 - name: install lvm2
   apt: 
     name: lvm2
@@ -17,3 +21,9 @@
 
 - name: LVM VG Create
   lvg: vg=drbdpool pvs="{{ drbdpool_dev_path }}"
+
+- name: LVM ThinPool Create
+  lvol:
+    vg: drbdpool
+    thinpool: volpool
+    size: 95%FREE
