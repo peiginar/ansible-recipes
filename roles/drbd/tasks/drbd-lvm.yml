@@ -27,3 +27,4 @@
     vg: drbdpool
     thinpool: volpool
     size: 95%FREE
+  when: drbd_thinpool|default(false)
