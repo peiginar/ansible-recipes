@@ -9,6 +9,7 @@ ldap_client_enable: true
 ldap_uri: ldap://192.168.1.253/
 ldap_base: dc=example,dc=local
 ldap_test_uid: 1025
+maintenance_uid: ubuntu
 nfs_server: "nfs.{{ dns_domain }}"
 http_proxy_server: 172.16.67.119
 #http_proxy_user: user

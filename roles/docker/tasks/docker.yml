@@ -1,14 +1,9 @@
 - name: install utils packages
   apt:
-    name: "{{ item }}"
+    name: ['apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common',]
     state: present
     update_cache: yes
     cache_valid_time: "{{ apt_cache_validate_time }}"
-  with_items:
-    - apt-transport-https
-    - ca-certificates
-    - curl
-    - software-properties-common
 
 - name: Add Docker GPG key
   apt_key: url=https://download.docker.com/linux/ubuntu/gpg
@@ -25,12 +20,10 @@
 
 - name: docker Install
   apt:
-    name: "{{ item }}"
+    name: ['docker-ce',]
     state: present
     update_cache: yes
     cache_valid_time: "{{ apt_cache_validate_time }}"
-  with_items:
-    - docker-ce
 
 - name: check docker-compose
   shell: /usr/local/bin/docker-compose -v
@@ -45,5 +38,12 @@
     chmod +x /usr/local/bin/docker-compose'
   when: compose_result.rc != 0
   tags: compose
+
+- name: usermod add group
+  shell: 'if id -un {{item}} && test -z "$(id {{item}}|grep docker)"; then usermod -aG docker {{item}}; fi'
+  with_items:
+    - "{{ ansible_user }}"
+    - "{{ maintenance_uid|default('unknown_username') }}"
+  changed_when: False
 
 # vim: set ts=2 sw=2 et:

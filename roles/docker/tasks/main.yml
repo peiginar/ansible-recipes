@@ -1,11 +1,22 @@
+- name: set docker enable flag
+  set_fact:
+    docker_enable_flag: "{{ docker_enable|default(true) and ansible_virtualization_type in ('VMware', 'kvm') }}"
+  tags: [ docker ]
+
+- name: show docker enable flag
+  debug:
+    var: docker_enable_flag
+  when: docker_enable_flag
+  tags: [ docker ]
+
 - import_tasks: docker.yml
   environment:
     http_proxy: "{{ http_auth_proxy }}"
     https_proxy: "{{ http_auth_proxy }}"
     no_proxy: "localhost,.{{ dns_domain }}"
-  when: http_auth_proxy|default('')|length() > 0
+  when: docker_enable_flag and http_auth_proxy|default('')|length() > 0
   tags: [ docker ]
 
 - import_tasks: docker.yml
-  when: http_auth_proxy|default('')|length() == 0
+  when: docker_enable_flag and http_auth_proxy|default('')|length() == 0
   tags: [ docker ]
