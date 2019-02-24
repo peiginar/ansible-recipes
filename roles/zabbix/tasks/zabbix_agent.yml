@@ -32,12 +32,10 @@
 
 - name: apt install zabbix-agent
   apt:
-    name: "{{item}}"
+    name: ['zabbix-agent']
     state: latest
     update_cache: yes
     cache_valid_time: "{{ apt_cache_validate_time }}"
-  with_items:
-    - zabbix-agent
   notify: enable zabbix-agent
   tags: [common, aptinstall, zabbix]
 

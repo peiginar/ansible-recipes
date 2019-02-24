@@ -61,25 +61,25 @@
 
 - name: apt install
   apt:
-    name: "{{item}}"
+    name: ['openssh-server', 'vim', 'git', 'curl', 'language-pack-ja', 'bash-completion',
+        'htop', 'parted', 'gdisk', 'avahi-daemon', 'gpg'
+        ]
     state: latest
     update_cache: yes
     cache_valid_time: "{{ apt_cache_validate_time }}"
-  with_items:
-    - openssh-server
-    - vim
-    - git
-    - curl
-    - language-pack-ja
-    - bash-completion
-    - htop
-    - parted
-    - gdisk
-    - avahi-daemon
-    - gpg
-    - "{{ apt_extra_packages }}"
   async: 180
   poll: 5
+  tags: [common, aptinstall]
+
+- name: apt install extra
+  apt:
+    name: "{{ apt_extra_packages }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_validate_time }}"
+  async: 180
+  poll: 5
+  when: apt_extra_packages| length() > 0
   tags: [common, aptinstall]
 
 #- name: apt install not lxc
@@ -104,7 +104,7 @@
   when: distupgrade|default("") == "yes"
 
 - name: apt autoremove after upgrade
-  shell: apt-get autoremove -y
+  shell: apt autoremove -y
   async: 180
   poll: 5
   tags: [common, aptinstall]
