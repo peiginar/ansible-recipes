@@ -104,7 +104,9 @@
   when: distupgrade|default("") == "yes"
 
 - name: apt autoremove after upgrade
-  shell: apt autoremove -y
+  apt:
+    autoremove: yes
+    purge: yes
   async: 180
   poll: 5
   tags: [common, aptinstall]
